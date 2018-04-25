@@ -411,9 +411,9 @@ var sproto = (function() {
     };
 
     // query
-    function sproto_prototag(sp, name){
-        for (var i=0; i<sp.protocol_n; i++){
-            if (name == sp.proto[i].name){
+    function sproto_prototag(sp, name) {
+        for (var i = 0; i < sp.protocol_n; i++) {
+            if (name == sp.proto[i].name) {
                 return sp.proto[i].tag;
             }
         }
@@ -421,16 +421,17 @@ var sproto = (function() {
     }
 
     // 二分查找
-    function query_proto(sp, tag){
+    function query_proto(sp, tag) {
         var begin = 0;
         var end = sp.protocol_n;
-        while(begin < end){
-            var mid = Math.floor((begin+end) / 2);
+        while (begin < end) {
+            var mid = Math.floor((begin + end) / 2);
             var t = sp.proto[mid].tag;
-            if (t == tag){
+            if (t == tag) {
                 return sp.proto[mid];
             }
-            if (tag > t){
+
+            if (tag > t) {
                 begin = mid + 1;
             } else {
                 end = mid;
@@ -439,63 +440,65 @@ var sproto = (function() {
         return null;
     }
 
-    function sproto_protoquery(sp, proto, what){
+    function sproto_protoquery(sp, proto, what) {
         var p = null;
-        if (what < 0 || what > 1){
+        if (what < 0 || what > 1) {
             return null;
         }
+
         p = query_proto(sp, proto);
-        if (p){
+        if (p) {
             return p.p[what];
         }
         return null;
     }
 
-    function sproto_protoresponse(sp, proto){
+    function sproto_protoresponse(sp, proto) {
         var p = query_proto(sp, proto);
         return (p != null && (p.p[SPROTO_RESPONSE] || p.confirm));
     }
 
-    function sproto_protoname(sp, proto){
+    function sproto_protoname(sp, proto) {
         var p = query_proto(sp, proto);
-        if (p){
+        if (p) {
             return p.name;
         }
         return null;
     }
 
-    function sproto_type(sp, type_name){
-        for (var i=0; i<sp.type_n; i++){
-            if (type_name == sp.type[i].name){
+    function sproto_type(sp, type_name) {
+        for (var i = 0; i < sp.type_n; i++) {
+            if (type_name == sp.type[i].name) {
                 return sp.type[i];
             }
         }
         return null;
     }
 
-    function sproto_name(st){
+    function sproto_name(st) {
         return st.name;
     }
 
-    function findtag(st, tag){
+    function findtag(st, tag) {
         var begin, end;
-        if (st.base >= 0){
+        if (st.base >= 0) {
             tag -= st.base;
-            if (tag < 0 || tag > st.n){
+            if (tag < 0 || tag > st.n) {
                 return null;
             }
             return st.f[tag];
         }
+
         begin = 0;
         end = st.n;
-        while(begin < end){
+        while (begin < end) {
             var mid = Math.floor((begin + end) / 2);
             var f = st.f[mid];
             var t = f.tag;
-            if (t == tag){
+            if (t == tag) {
                 return f;
             }
-            if (tag > t){
+            if (tag > t) {
                 begin = mid + 1;
             } else {
                 end = mid;
@@ -504,7 +507,7 @@ var sproto = (function() {
         return null;
     }
 
-    function fill_size(data, data_idx, sz){
+    function fill_size(data, data_idx, sz) {
         data[data_idx] = sz & 0xff;
         data[data_idx+1] = (sz >> 8) & 0xff;
         data[data_idx+2] = (sz >> 16) & 0xff;
@@ -512,9 +515,7 @@ var sproto = (function() {
         return sz + SIZEOF_LENGTH;
     }
 
-    function encode_integer(v, data, data_idx, size){
-        //if (size < SIZEOF_LENGTH + sizeof(v))
-        //	return -1;
+    function encode_integer(v, data, data_idx, size) {
         data[data_idx+4] = v & 0xff;
         data[data_idx+5] = (v >> 8) & 0xff;
         data[data_idx+6] = (v >> 16) & 0xff;
@@ -522,9 +523,7 @@ var sproto = (function() {
         return fill_size(data, data_idx, 4);
     }
 
-    function encode_uint64(v, data, data_idx, size){
-        //if (size < SIZEOF_LENGTH + sizeof(v))
-        //	return -1;
+    function encode_uint64(v, data, data_idx, size) {
         data[data_idx+4] = v & 0xff;
         data[data_idx+5] = uint64_rshift(v, 8) & 0xff;
         data[data_idx+6] = uint64_rshift(v, 16) & 0xff;
@@ -536,59 +535,35 @@ var sproto = (function() {
         return fill_size(data, data_idx, 8);
     }
 
-    /*
-    //#define CB(tagname,type,index,subtype,value,length) cb(ud, tagname,type,index,subtype,value,length)
-
-    static int
-    do_cb(sproto_callback cb, void *ud, const char *tagname, int type, int index, struct sproto_type *subtype, void *value, int length) {
-        if (subtype) {
-            if (type >= 0) {
-                printf("callback: tag=%s[%d], subtype[%s]:%d\n",tagname,index, subtype->name, type);
-            } else {
-                printf("callback: tag=%s[%d], subtype[%s]\n",tagname,index, subtype->name);
-            }
-        } else if (index > 0) {
-            printf("callback: tag=%s[%d]\n",tagname,index);
-        } else if (index == 0) {
-            printf("callback: tag=%s\n",tagname);
-        } else {
-            printf("callback: tag=%s [mainkey]\n",tagname);
-        }
-        return cb(ud, tagname,type,index,subtype,value,length);
-    }
-    #define CB(tagname,type,index,subtype,value,length) do_cb(cb,ud, tagname,type,index,subtype,value,length)
-    */
-    function encode_object(cb, args, data, data_idx){
+    function encode_object(cb, args, data, data_idx) {
         var sz;
-        //args.value = data_idx + SIZEOF_LENGTH;
-        //传入 buffer代替原文的data指针
         args.buffer = data;
         args.buffer_idx = data_idx + SIZEOF_LENGTH;
         sz = cb(args);
-        if (sz < 0){
-            if (sz == SPROTO_CB_NIL){
+        if (sz < 0) {
+            if (sz == SPROTO_CB_NIL) {
                 return 0;
             }
-            return -1; // sz == SPROTO_CB_ERROR
+            return -1;
         }
         return fill_size(data, data_idx, sz);
     }
 
-    function uint32_to_uint64(negative, buffer, buffer_idx){
+    function uint32_to_uint64(negative, buffer, buffer_idx) {
         if (negative) {
-            buffer[buffer_idx+4] = 0xff;
-            buffer[buffer_idx+5] = 0xff;
-            buffer[buffer_idx+6] = 0xff;
-            buffer[buffer_idx+7] = 0xff;
+            buffer[buffer_idx + 4] = 0xff;
+            buffer[buffer_idx + 5] = 0xff;
+            buffer[buffer_idx + 6] = 0xff;
+            buffer[buffer_idx + 7] = 0xff;
         } else {
-            buffer[buffer_idx+4] = 0;
-            buffer[buffer_idx+5] = 0;
-            buffer[buffer_idx+6] = 0;
-            buffer[buffer_idx+7] = 0;
+            buffer[buffer_idx + 4] = 0;
+            buffer[buffer_idx + 5] = 0;
+            buffer[buffer_idx + 6] = 0;
+            buffer[buffer_idx + 7] = 0;
         }
     }
 
-    function encode_integer_array(cb, args, buffer, buffer_idx, noarray){
+    function encode_integer_array(cb, args, buffer, buffer_idx, noarray) {
         var intlen, index;
         var header_idx = buffer_idx;
         
@@ -603,68 +578,71 @@ var sproto = (function() {
             args.length = 8;
             args.index = index;
             sz = cb(args);
-            if (sz <= 0){
-                if (sz == SPROTO_CB_NIL){
+            if (sz <= 0) {
+                if (sz == SPROTO_CB_NIL) {
                     break;
                 }
-                if (sz == SPROTO_CB_NOARRAY){
+
+                if (sz == SPROTO_CB_NOARRAY) {
                     noarray.value = 1;
                     break;
                 }
+
                 return null;
             }
             
-            if (sz == 4){
+            if (sz == 4) {
                 var v = args.value;
                 buffer[buffer_idx] = v & 0xff;
-                buffer[buffer_idx+1] = (v >> 8) & 0xff;
-                buffer[buffer_idx+2] = (v >> 16) & 0xff;
-                buffer[buffer_idx+3] = (v >> 24) & 0xff;
+                buffer[buffer_idx + 1] = (v >> 8) & 0xff;
+                buffer[buffer_idx + 2] = (v >> 16) & 0xff;
+                buffer[buffer_idx + 3] = (v >> 24) & 0xff;
                 
-                if (intlen == 8){
+                if (intlen == 8) {
                     uint32_to_uint64(v & 0x80000000, buffer, buffer_idx);
                 }
             } else {
                 var v;
-                if (sz != 8){
+                if (sz != 8) {
                     return null;
                 }
-                if (intlen == 4){
+
+                if (intlen == 4) {
                     buffer_idx += (index -1) * 4;
-                    for (var i=index-2; i>=0; i--){
+                    for (var i = index - 2; i >= 0; i--) {
                         var negative;
-                        for (var j=1+i*8; j<1+i*8+4; j++){
-                            header[j] = header[j-i*4];
+                        for (var j = (1 + i * 8); j < (1 + i * 8 + 4); j++) {
+                            header[j] = header[j - i * 4];
                         }
-                        negative = header[1+i*8+3] & 0x80;
-                        uint32_to_uint64(negative, buffer, buffer_idx+1+i*8);
+                        negative = header[1 + i * 8 + 3] & 0x80;
+                        uint32_to_uint64(negative, buffer, buffer_idx + 1 + i * 8);
                     }
                     intlen = 8;
                 }
 
                 v = value;
                 buffer[buffer_idx] = v & 0xff;
-                buffer[buffer_idx+1] = (v >> 8) & 0xff;
-                buffer[buffer_idx+2] = (v >> 16) & 0xff;
-                buffer[buffer_idx+3] = (v >> 24) & 0xff;
-                buffer[buffer_idx+4] = (v >> 32) & 0xff;
-                buffer[buffer_idx+5] = (v >> 40) & 0xff;
-                buffer[buffer_idx+6] = (v >> 48) & 0xff;
-                buffer[buffer_idx+7] = (v >> 56) & 0xff;
+                buffer[buffer_idx + 1] = (v >> 8) & 0xff;
+                buffer[buffer_idx + 2] = (v >> 16) & 0xff;
+                buffer[buffer_idx + 3] = (v >> 24) & 0xff;
+                buffer[buffer_idx + 4] = (v >> 32) & 0xff;
+                buffer[buffer_idx + 5] = (v >> 40) & 0xff;
+                buffer[buffer_idx + 6] = (v >> 48) & 0xff;
+                buffer[buffer_idx + 7] = (v >> 56) & 0xff;
             }
 
             buffer_idx += intlen;
             index++;
         }
 
-        if (buffer_idx == header_idx+1){
+        if (buffer_idx == header_idx + 1) {
             return header_idx;
         }
         buffer[header_idx] = intlen & 0xff;
         return buffer_idx;
     }
 
-    function encode_array(cb, args, data, data_idx){
+    function encode_array(cb, args, data, data_idx) {
         var sz;
         var buffer = data;
         var buffer_idx = data_idx + SIZEOF_LENGTH;
