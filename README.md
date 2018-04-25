@@ -6,8 +6,9 @@ js 的实现原版在[这里](https://github.com/zhangshiqian1214/sproto-js). �
 - [x] host 函数
 - [x] attach 函数
 - [x] dispatch 函数
-- [ ] 格式化
+- [ ] 代码可读性, 格式化修改
 - [ ] 可读性
 - [ ] spb 文件生成跨平台工具
 - [ ] 示例
 - [ ] typescript 支持
+- [ ] sproto_dump 实现

@@ -20,7 +20,7 @@ var utils = (function(){
         return a;
     }
 
-    t.string2utf8 = function(str){
+    t.string2utf8 = function(str) {
         var back = [];
         var byteSize = 0;
         for (var i = 0; i < str.length; i++) {
@@ -49,11 +49,13 @@ var utils = (function(){
         if (typeof arr === 'string') {
             return null;
         }
+
         var UTF = '';
         for (var i = 0; i < arr.length; i++) {
-            if (arr[i] == null){
+            if (arr[i] == null) {
                 break;
             }
+
             var one = arr[i].toString(2);
             var v = one.match(/^1+?(?=0)/);
             if (v && one.length == 8) {
@@ -71,17 +73,21 @@ var utils = (function(){
         return UTF;
     };
 
-    t.arrayconcat = function(a1, a2){
+    t.arrayconcat = function(a1, a2) {
         var b = new Array();
-        for (var i=0; i<a1.length; i++){
+        
+        for (var i = 0; i < a1.length; i++) {
             b[i] = a1[i];
         }
-        for (var j=a1.length; j<a1.length + a2.length; j++){
-            b[j] = a2[j-a1.length];
+
+        for (var j = a1.length; j < a1.length + a2.length; j++) {
+            b[j] = a2[j - a1.length];
         }
+
         return b;
     };
 
     return t;
 }());
+
 module.exports = utils;

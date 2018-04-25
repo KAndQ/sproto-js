@@ -2,12 +2,12 @@
 
 var utils = require('./utils');
 
-var Sproto = (function(){
+var sproto = (function() {
     var t = {};
     var host = {};
     var header_tmp = {};
 
-    //常量定义
+    // 常量定义
     var SPROTO_REQUEST = 0;
     var SPROTO_RESPONSE = 1;
 
@@ -35,38 +35,38 @@ var Sproto = (function(){
     var ENCODE_MAXSIZE = 0x1000000;
     var ENCODE_DEEPLEVEL = 64;
 
-    //js中只long只能表示到2^52-1, 0xFFFFFFFFFFFFF表示
-    function expand64(v){
+    // js中只long只能表示到2^52-1, 0xFFFFFFFFFFFFF表示
+    function expand64(v) {
         var value = v;
-        if ((value & 0x80000000) != 0){
+        if ((value & 0x80000000) != 0) {
             value = 0x0000000000000 + (value & 0xFFFFFFFF);
         }
         return value;
     }
 
-    function hi_low_uint64(low, hi){
+    function hi_low_uint64(low, hi) {
         var value = (hi & 0xFFFFFFFF) * 0x100000000 + low;
         return value;
     }
 
-    //64位整数位移操作会将64位截成32位有符号整数
-    function uint64_lshift(num, offset){
+    // 64位整数位移操作会将64位截成32位有符号整数
+    function uint64_lshift(num, offset) {
         return num * Math.pow(2, offset);
     }
 
-    function uint64_rshift(num, offset){
+    function uint64_rshift(num, offset) {
         return Math.floor(num / Math.pow(2, offset));
     }
 
-    function toword(stream){
+    function toword(stream) {
         return (stream[0] & 0xff) | (stream[1] & 0xff) << 8;
     };
 
-    function todword(stream){
+    function todword(stream) {
         return ((stream[0] & 0xff) | (stream[1] & 0xff) << 8 | (stream[2] & 0xff) << 16 | (stream[3] & 0xff) << 24) >>> 0;
     };
 
-    function count_array(stream){
+    function count_array(stream) {
         var length = todword(stream);
         var n = 0;
         stream = stream.slice(SIZEOF_LENGTH);
@@ -87,16 +87,18 @@ var Sproto = (function(){
         return n;
     };
 
-    function struct_field(stream, sz){
+    function struct_field(stream, sz) {
         var field, fn, header, i;
         if (sz < SIZEOF_LENGTH) {
             return -1;
         }
+
         fn = toword(stream);
         header = SIZEOF_HEADER + SIZEOF_FIELD * fn;
         if (sz < header) {
             return -1;
         }
+
         field = stream.slice(SIZEOF_HEADER);
         sz -= header;
         stream = stream.slice(header);
@@ -106,20 +108,23 @@ var Sproto = (function(){
             if (value != 0) {
                 continue;
             }
+
             if (sz < SIZEOF_LENGTH) {
                 return -1;
             }
+
             dsz = todword(stream);
             if (sz < SIZEOF_LENGTH + dsz) {
                 return -1;
             }
+
             stream = stream.slice(SIZEOF_LENGTH + dsz);
             sz -= SIZEOF_LENGTH + dsz;
         }
         return fn;
     };
 
-    //stream 是arraybuffer
+    // stream 是arraybuffer
     function import_string(s, stream) {
         var sz = todword(stream);
         var buffer = "";
@@ -127,20 +132,19 @@ var Sproto = (function(){
         for (var i = 0; i < arr.length; i++) {
             buffer += String.fromCharCode(arr[i]);
         }
-        //buffer += '\0';
         return buffer;
     };
 
-    function calc_pow(base, n){
+    function calc_pow(base, n) {
         if (n == 0) return 1;
         var r = calc_pow(base * base , Math.floor(n / 2));
-        if ((n & 1) != 0){
+        if ((n & 1) != 0) {
             r *= base;
         }
         return r;
     };
 
-    function import_field(s, f, stream){
+    function import_field(s, f, stream) {
         var sz, result, fn;
         var array = 0;
         var tag = -1;
@@ -156,55 +160,59 @@ var Sproto = (function(){
         result = stream.slice(sz);
         fn = struct_field(stream, sz);
         if (fn < 0) return null;
+
         stream = stream.slice(SIZEOF_HEADER);
-        for (var i=0; i<fn; i++){
+        for (var i = 0; i < fn; i++) {
             var value;
             ++tag;
             value = toword(stream.slice(SIZEOF_FIELD * i));
-            if (value & 1 != 0){
+            if (value & 1 != 0) {
                 tag += Math.floor(value / 2);
                 continue;
             }
-            if (tag == 0){
+
+            if (tag == 0) {
                 if (value != 0) return null;
                 f.name = import_string(s, stream.slice(fn * SIZEOF_FIELD));
                 continue;
             }
+
             if (value == 0) return null;
             value = Math.floor(value / 2) - 1;
-            switch(tag){
-            case 1: //buildin
+            switch(tag) {
+            case 1:
                 if (value >= SPROTO_TSTRUCT) {
-                return null;
+                    return null;
                 }
                 f.type = value;
                 break;
-            case 2: //type index
-                if (f.type == SPROTO_TINTEGER){
+            case 2:
+                if (f.type == SPROTO_TINTEGER) {
                     f.extra = calc_pow(10, value);
-                } else if (f.type == SPROTO_TSTRING){
-                    f.extra = value; // string if 0 ; binary is 1
+                } else if (f.type == SPROTO_TSTRING) {
+                    f.extra = value;
                 } else {
-                    if (value >= s.type_n)  {
-                    return null;
+                    if (value >= s.type_n) {
+                        return null;
                     }
+
                     if (f.type >= 0) {
-                    return null;
+                        return null;
                     }
+
                     f.type = SPROTO_TSTRUCT;
-                    //f.st = s.type[value];
                     f.st = value;
                 }
                 break;
-            case 3: // tag
+            case 3:
                 f.tag = value;
                 break;
-            case 4: // array
-                if (value != 0){
+            case 4:
+                if (value != 0) {
                     array = SPROTO_TARRAY;
-                } 
+                }
                 break;
-            case 5: // key
+            case 5:
                 f.key = value;
                 break;
             default:
@@ -218,19 +226,21 @@ var Sproto = (function(){
         return result;
     };
 
-    function import_type(s, t, stream){
+    function import_type(s, t, stream) {
         var result, fn, n, maxn, last;
         var sz = todword(stream);
         stream = stream.slice(SIZEOF_LENGTH);
         result = stream.slice(sz);
         fn = struct_field(stream, sz);
-        if (fn <= 0 || fn > 2){
+        if (fn <= 0 || fn > 2) {
             return null;
         }
-        for (var i=0; i<fn*SIZEOF_FIELD; i+=SIZEOF_FIELD){
+
+        for (var i = 0; i < fn * SIZEOF_FIELD; i += SIZEOF_FIELD) {
             var v = toword(stream.slice(SIZEOF_HEADER + i));
             if (v != 0) return null;
         }
+
         t.name = null;
         t.n = 0;
         t.base = 0;
@@ -238,13 +248,15 @@ var Sproto = (function(){
         t.f = null;
         stream = stream.slice(SIZEOF_HEADER + fn * SIZEOF_FIELD);
         t.name = import_string(s, stream);
-        if(fn == 1) {
-        return result;
+
+        if (fn == 1) {
+            return result;
         }
-        stream = stream.slice(todword(stream)+SIZEOF_LENGTH);
+
+        stream = stream.slice(todword(stream) + SIZEOF_LENGTH);
         n = count_array(stream);
         if (n < 0) {
-        return null;
+            return null;
         }
         
         stream = stream.slice(SIZEOF_LENGTH);
@@ -252,26 +264,27 @@ var Sproto = (function(){
         last = -1;
         t.n = n;
         t.f = new Array();
-        for (var i=0; i<n; i++){
+        for (var i = 0; i < n; i++) {
             var tag;
             t.f[i] = new Object();
             var f = t.f[i];
             stream = import_field(s, f, stream);
             if (stream == null) {
-            return null;
+                return null;
             }
+
             tag = f.tag;
             if (tag <= last) {
-            return null;
+                return null;
             }
             if (tag > last + 1) {
-            ++maxn;
+                ++maxn;
             }
             last = tag;
         }
         t.maxn = maxn;
         t.base = t.f[0].tag;
-        n = t.f[n-1].tag - t.base + 1;
+        n = t.f[n - 1].tag - t.base + 1;
         if (n != t.n) {
             t.base = -1;
         }
@@ -286,7 +299,7 @@ var Sproto = (function(){
         response 3 : integer
     }
     */
-    function import_protocol(s, p, stream){
+    function import_protocol(s, p, stream) {
         var result, sz, fn, tag;
         sz = todword(stream);
         stream = stream.slice(SIZEOF_LENGTH);
@@ -300,37 +313,37 @@ var Sproto = (function(){
         p.p[SPROTO_RESPONSE] = null;
         p.confirm = 0;
         tag = 0;
-        for (var i=0; i<fn; i++,tag++){
+        for (var i = 0; i < fn; i++, tag++) {
             var value = toword(stream.slice(SIZEOF_FIELD * i));
-            if (value & 1 != 0){
-                tag += Math.floor(value-1)/2;
+            if (value & 1 != 0) {
+                tag += Math.floor(value - 1) / 2;
                 continue;
             }
-            value = Math.floor(value/2) - 1;
-            switch(i){
-            case 0: // name
-                if (value != -1){
+            value = Math.floor(value / 2) - 1;
+            switch(i) {
+            case 0:
+                if (value != -1) {
                     return null;
                 }
-                p.name = import_string(s, stream.slice(SIZEOF_FIELD *fn));
+                p.name = import_string(s, stream.slice(SIZEOF_FIELD * fn));
                 break;
-            case 1: // tag
-                if (value < 0){
-                return null;
+            case 1:
+                if (value < 0) {
+                    return null;
                 }
                 p.tag = value;
                 break;
-            case 2: // request
+            case 2:
                 if (value < 0 || value >= s.type_n)
                     return null;
                 p.p[SPROTO_REQUEST] = s.type[value];
                 break;
-            case 3: // response
+            case 3:
                 if (value < 0 || value >s.type_n)
                     return null;
                 p.p[SPROTO_RESPONSE] = s.type[value];
                 break;
-            case 4: // confirm
+            case 4:
                 p.confirm = value;
                 break;
             default:
@@ -338,13 +351,13 @@ var Sproto = (function(){
             }
         }
 
-        if (p.name == null || p.tag < 0){
+        if (p.name == null || p.tag < 0) {
             return null;
         }  
         return result;
     }
 
-    function create_from_bundle(s, stream, sz){
+    function create_from_bundle(s, stream, sz) {
         var content, typedata, protocoldata;
         var fn = struct_field(stream, sz);
         if (fn < 0 || fn > 2)
@@ -352,16 +365,18 @@ var Sproto = (function(){
         stream = stream.slice(SIZEOF_HEADER);
         content = stream.slice(fn*SIZEOF_FIELD);
         
-        for(var i=0; i<fn; i++){
-            var value = toword(stream.slice(i*SIZEOF_FIELD));
+        for(var i = 0; i < fn; i++) {
+            var value = toword(stream.slice(i * SIZEOF_FIELD));
             if (value != 0) {
                 return null;
             }
+
             var n = count_array(content);
             if (n < 0) {
                 return null;
             }
-            if (i == 0){
+
+            if (i == 0) {
                 typedata = content.slice(SIZEOF_LENGTH);
                 s.type_n = n;
                 s.type = new Array();
@@ -372,26 +387,27 @@ var Sproto = (function(){
             }
             content = content.slice(todword(content) + SIZEOF_LENGTH);
         }
-        for (var i=0; i<s.type_n; i++){
+
+        for (var i = 0; i < s.type_n; i++) {
             s.type[i] = new Object();
             typedata = import_type(s, s.type[i], typedata);
-            if (typedata == null){
+            if (typedata == null) {
                 return null;
             }
         }
 
-        for (var i=0; i<s.protocol_n; i++){
+        for (var i = 0; i < s.protocol_n; i++) {
             s.proto[i] = new Object();
             protocoldata = import_protocol(s, s.proto[i], protocoldata);
-            if (protocoldata == null){
+            if (protocoldata == null) {
                 return null;
             }
         }
+
         return s;
     };
 
-    function sproto_dump(s){
-
+    function sproto_dump(s) {
     };
 
     // query
@@ -1684,4 +1700,4 @@ var Sproto = (function(){
     return t;
 }());
 
-module.exports = Sproto;
+module.exports = sproto;
