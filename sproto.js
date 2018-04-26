@@ -407,7 +407,9 @@ var sproto = (function() {
         return s;
     };
 
-    function sproto_dump(s) {};
+    function sproto_dump(s) {
+        console.log(s);
+    };
 
     // query
     function sproto_prototag(sp, name) {
@@ -1492,6 +1494,12 @@ var sproto = (function() {
                 sp.pcache[tag] = v;
             }
             return v;
+        }
+
+        sp.dump = function() {
+            console.log("========== sproto dump ==========");
+            sproto_dump(this);
+            console.log("=================================");
         }
 
         sp.objlen = function(type, inbuf) {

@@ -11,10 +11,14 @@ function readBinary(filename) {
 }
 
 let server = sproto.createNew(readBinary("c2s.spb"));
+server.dump();
+
 let serverHost = server.host();
 let serverSender = serverHost.attach(sproto.createNew(readBinary("s2c.spb")));
 
 let client = sproto.createNew(readBinary("s2c.spb"));
+client.dump();
+
 let clientHost = client.host();
 let clientSender = clientHost.attach(sproto.createNew(readBinary("c2s.spb")));
 
