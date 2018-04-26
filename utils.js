@@ -1,7 +1,6 @@
-
-var utils = (function(){
+var utils = (function() {
     var t = {};
-    
+
     t.array2arraybuffer = function(array) {
         var b = new ArrayBuffer(array.length);
         var v = new DataView(b, 0);
@@ -10,7 +9,7 @@ var utils = (function(){
         }
         return b;
     }
-    
+
     t.arraybuffer2array = function(buffer) {
         var v = new DataView(buffer, 0);
         var a = new Array();
@@ -64,7 +63,7 @@ var utils = (function(){
             if (v && one.length == 8) {
                 var bytesLength = v[0].length;
                 var store = arr[i].toString(2).slice(7 - bytesLength);
-                
+
                 for (var st = 1; st < bytesLength; st++) {
                     store += arr[st + i].toString(2).slice(2);
                 }
@@ -79,7 +78,7 @@ var utils = (function(){
 
     t.arrayconcat = function(a1, a2) {
         var b = new Array();
-        
+
         for (var i = 0; i < a1.length; i++) {
             b[i] = a1[i];
         }
