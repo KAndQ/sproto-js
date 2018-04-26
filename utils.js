@@ -23,6 +23,7 @@ var utils = (function(){
     t.string2utf8 = function(str) {
         var back = [];
         var byteSize = 0;
+
         for (var i = 0; i < str.length; i++) {
             var code = str.charCodeAt(i);
             if (0x00 <= code && code <= 0x7f) {
@@ -39,13 +40,15 @@ var utils = (function(){
                 back.push((128 | (63 & code)))
             }
         }
+
         for (i = 0; i < back.length; i++) {
             back[i] &= 0xff;
         }
+
         return back;
     };
 
-    t.utf82string = function(arr){
+    t.utf82string = function(arr) {
         if (typeof arr === 'string') {
             return null;
         }
