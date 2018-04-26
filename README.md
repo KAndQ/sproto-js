@@ -8,7 +8,7 @@ js 的实现原版在[这里](https://github.com/zhangshiqian1214/sproto-js). �
 - [x] dispatch 函数
 - [x] 代码可读性, 格式化修改
 - [ ] spb 文件生成工具
-    + windows;
+    + windows ;
     + mac;     // doing....
     + linux;
 - [x] 示例
