@@ -646,36 +646,38 @@ var sproto = (function() {
         var sz;
         var buffer = data;
         var buffer_idx = data_idx + SIZEOF_LENGTH;
-        switch(args.type){
-        case SPROTO_TINTEGER:{
+        switch(args.type) {
+        case SPROTO_TINTEGER:
             var noarray = {};
             noarray.value = 0;
             buffer_idx = encode_integer_array(cb, args, buffer, buffer_idx, noarray);
-            if (buffer_idx == null){
+            if (buffer_idx == null) {
                 return -1;
             }
-            if (noarray.value != 0){
+
+            if (noarray.value != 0) {
                 return 0;
             }
             break;
-        }
         case SPROTO_TBOOLEAN:
             args.index = 1;
-            for (;;){
+            for (;;) {
                 var v = 0;
                 args.value = v;
                 args.length = 4;
                 sz = cb(args);
-                if (sz < 0){
+                if (sz < 0) {
                     if (sz == SPROTO_CB_NIL)
                         break;
                     if (sz == SPROTO_CB_NOARRAY)
                         return 0;
                     return -1;
                 }
-                if (sz < 1){
+
+                if (sz < 1) {
                     return -1;
                 }
+
                 buffer[buffer_idx] = (args.value == 1) ? 1 : 0;
                 buffer_idx++;
                 ++args.index;
@@ -683,18 +685,19 @@ var sproto = (function() {
             break;
         default:
             args.index = 1;
-            for (;;){
+            for (;;) {
                 args.buffer = buffer;
                 args.buffer_idx = buffer_idx + SIZEOF_LENGTH;
-                //args.value =  buffer_idx + SIZEOF_LENGTH;
                 sz = cb(args);
-                if (sz < 0){
-                    if (sz == SPROTO_CB_NIL){
+                if (sz < 0) {
+                    if (sz == SPROTO_CB_NIL) {
                         break;
                     }
-                    if (sz == SPROTO_CB_NOARRAY){
+
+                    if (sz == SPROTO_CB_NOARRAY) {
                         return 0;
                     }
+
                     return -1;
                 }
 
@@ -704,34 +707,37 @@ var sproto = (function() {
             }
             break;
         }
+
         sz = buffer_idx - (data_idx + SIZEOF_LENGTH);
         if (sz == 0) {
             return 0;
         }
+
         return fill_size(buffer, data_idx, sz);
     }
 
-
-
-    function decode_array_object(cb, args, stream, sz){
+    function decode_array_object(cb, args, stream, sz) {
         var hsz;
         var index = 1;
-        while(sz > 0){
-            if (sz < SIZEOF_LENGTH){
+        while(sz > 0) {
+            if (sz < SIZEOF_LENGTH) {
                 return -1;
             }
+
             hsz = todword(stream);
             stream = stream.slice(SIZEOF_LENGTH);
             sz -=  SIZEOF_LENGTH;
-            if (hsz > sz){
+            if (hsz > sz) {
                 return -1;
             }
+
             args.index = index;
             args.value = stream;
             args.length = hsz;
-            if (cb(args) != 0){
+            if (cb(args) != 0) {
                 return -1;
             }
+
             sz -= hsz;
             stream = stream.slice(hsz);
             ++index;
@@ -740,42 +746,44 @@ var sproto = (function() {
     }
 
 
-    function decode_array(cb, args, stream){
+    function decode_array(cb, args, stream) {
         var sz = todword(stream);
         var type = args.type;
-        if (sz == 0){
+        if (sz == 0) {
             args.index = -1;
             args.value = null;
             args.length = 0;
             cb(args);
             return 0;
         }
+
         stream = stream.slice(SIZEOF_LENGTH);
         switch (type) {
-        case SPROTO_TINTEGER: {
+        case SPROTO_TINTEGER:
             var len = stream[0];
             stream = stream.slice(1);
             --sz;
-            if (len == 4){
-                if (sz % 4 != 0){
+            if (len == 4) {
+                if (sz % 4 != 0) {
                     return -1;
                 }
-                for (var i=0; i<Math.floor(sz/4); i++){
-                    var value = expand64(todword(stream.slice(i*4)));
-                    args.index = i+1;
+                for (var i=0; i<Math.floor(sz / 4); i++) {
+                    var value = expand64(todword(stream.slice(i * 4)));
+                    args.index = i + 1;
                     args.value = value;
                     args.length = 8;
                     cb(args);
                 }
-            } else if(len == 8){
-                if (sz % 8 != 0){
+            } else if(len == 8) {
+                if (sz % 8 != 0) {
                     return -1;
                 }
-                for (var i=0; i<Math.floor(sz/8); i++){
-                    var low = todword(stream.slice(i*8));
-                    var hi = todword(stream.slice(i*8 + 4));
+
+                for (var i = 0; i < Math.floor(sz / 8); i++) {
+                    var low = todword(stream.slice(i * 8));
+                    var hi = todword(stream.slice(i * 8 + 4));
                     var value = hi_low_uint64(low, hi);
-                    args.index = i+1;
+                    args.index = i + 1;
                     args.value = value;
                     args.length = 8;
                     cb(args);
@@ -784,11 +792,10 @@ var sproto = (function() {
                 return -1;
             }
             break;
-        }
         case SPROTO_TBOOLEAN:
-            for (var i=0; i<sz; i++){
+            for (var i = 0; i < sz; i++) {
                 var value = stream[i];
-                args.index = i+1;
+                args.index = i + 1;
                 args.value = value;
                 args.length = 8;
                 cb(args);
@@ -803,59 +810,64 @@ var sproto = (function() {
         return 0;
     }
 
-    function pack_seg(src, src_idx,  buffer, buffer_idx, sz, n){
+    function pack_seg(src, src_idx,  buffer, buffer_idx, sz, n) {
         var header = 0;
         var notzero = 0;
         var obuffer_idx = buffer_idx;
         buffer_idx++;
         sz--;
-        if (sz < 0){
+        if (sz < 0) {
             obuffer_idx = null;
         }
-        for (var i=0; i<8; i++){
-            if (src[src_idx+i] != 0){
+
+        for (var i = 0; i < 8; i++) {
+            if (src[src_idx + i] != 0) {
                 notzero++;
                 header |= 1 << i;
-                if (sz > 0){
-                    buffer[buffer_idx] = src[src_idx+i];
+                if (sz > 0) {
+                    buffer[buffer_idx] = src[src_idx + i];
                     ++buffer_idx;
                     --sz;
                 }
             }
         }
+
         if ((notzero == 7 || notzero == 6) && n > 0) {
             notzero = 8;
         }
 
-        if (notzero == 8){
-            if(n > 0){
+        if (notzero == 8) {
+            if (n > 0) {
                 return 8;
             } else {
                 return 10;
             }
         }
-        if (obuffer_idx != null){
+
+        if (obuffer_idx != null) {
             buffer[obuffer_idx] = header;
         }
+
         return notzero + 1;
     }
 
-    function write_ff(src, src_idx, des, dest_idx, n){
-        var align8_n = (n+7)&(~7);
+    function write_ff(src, src_idx, des, dest_idx, n) {
+        var align8_n = (n + 7) & (~7);
         des[dest_idx] = 0xff;
-        des[dest_idx+1] = Math.floor(align8_n/8) - 1;
-        for (var i=0; i<n; i++){
-            des[dest_idx+i+2] = src[src_idx+i];
+        des[dest_idx + 1] = Math.floor(align8_n / 8) - 1;
+
+        for (var i = 0; i < n; i++) {
+            des[dest_idx + i + 2] = src[src_idx + i];
         }
-        for (var i=0; i<align8_n-n; i++){
-            des[dest_idx+n+2+i] = 0;
+
+        for (var i = 0; i < align8_n - n; i++) {
+            des[dest_idx + n + 2 + i] = 0;
         }
     }
 
-    function sproto_pack(srcv, src_idx, bufferv, buffer_idx){
+    function sproto_pack(srcv, src_idx, bufferv, buffer_idx) {
         var tmp = new Array(8);
         var ff_srcstart, ff_desstart;
-        //ff_srcstart = new Array();
         var ff_srcstart_idx = 0;
         var ff_desstart_idx = 0;
         var ff_n = 0;
@@ -864,20 +876,22 @@ var sproto = (function() {
         var buffer = bufferv;
         var srcsz = srcv.length;
         var bufsz = 1 << 30;
-        for (var i=0; i<srcsz; i+=8){
+        for (var i = 0; i < srcsz; i += 8) {
             var n;
-            var padding = i+8 -srcsz;
-            if (padding > 0){
-                //memcpy(tmp, src, 8-padding)
-                for (var j=0; j<8-padding; j++){
-                    tmp[j] = src[src_idx+j];
+            var padding = i + 8 - srcsz;
+            if (padding > 0) {
+                for (var j = 0; j < 8 - padding; j++) {
+                    tmp[j] = src[src_idx + j];
                 }
-                for (var j=0; j<padding; j++){
-                    tmp[7-j] = 0;
+
+                for (var j = 0; j < padding; j++) {
+                    tmp[7 - j] = 0;
                 }
+
                 src = tmp;
                 src_idx = 0;
             }
+
             n = pack_seg(src, src_idx, buffer, buffer_idx, bufsz, ff_n);
             bufsz -= n;
             if (n == 10){

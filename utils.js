@@ -64,6 +64,7 @@ var utils = (function(){
             if (v && one.length == 8) {
                 var bytesLength = v[0].length;
                 var store = arr[i].toString(2).slice(7 - bytesLength);
+                
                 for (var st = 1; st < bytesLength; st++) {
                     store += arr[st + i].toString(2).slice(2);
                 }
