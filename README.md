@@ -7,7 +7,6 @@ js 的实现原版在[这里](https://github.com/zhangshiqian1214/sproto-js). �
 - [x] attach 函数
 - [x] dispatch 函数
 - [ ] 代码可读性, 格式化修改      // doing....
-- [ ] 可读性
 - [ ] spb 文件生成跨平台工具
 - [x] 示例
 - [ ] typescript 支持
