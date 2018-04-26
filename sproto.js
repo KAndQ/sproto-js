@@ -258,7 +258,7 @@ var sproto = (function() {
         if (n < 0) {
             return null;
         }
-        
+
         stream = stream.slice(SIZEOF_LENGTH);
         maxn = n;
         last = -1;
@@ -353,7 +353,7 @@ var sproto = (function() {
 
         if (p.name == null || p.tag < 0) {
             return null;
-        }  
+        }
         return result;
     }
 
@@ -364,7 +364,7 @@ var sproto = (function() {
             return null;
         stream = stream.slice(SIZEOF_HEADER);
         content = stream.slice(fn*SIZEOF_FIELD);
-        
+
         for(var i = 0; i < fn; i++) {
             var value = toword(stream.slice(i * SIZEOF_FIELD));
             if (value != 0) {
@@ -566,7 +566,7 @@ var sproto = (function() {
     function encode_integer_array(cb, args, buffer, buffer_idx, noarray) {
         var intlen, index;
         var header_idx = buffer_idx;
-        
+
         buffer_idx++;
         intlen = 4;
         index = 1;
@@ -590,14 +590,14 @@ var sproto = (function() {
 
                 return null;
             }
-            
+
             if (sz == 4) {
                 var v = args.value;
                 buffer[buffer_idx] = v & 0xff;
                 buffer[buffer_idx + 1] = (v >> 8) & 0xff;
                 buffer[buffer_idx + 2] = (v >> 16) & 0xff;
                 buffer[buffer_idx + 3] = (v >> 24) & 0xff;
-                
+
                 if (intlen == 8) {
                     uint32_to_uint64(v & 0x80000000, buffer, buffer_idx);
                 }
@@ -697,7 +697,7 @@ var sproto = (function() {
                     }
                     return -1;
                 }
-                
+
                 fill_size(buffer, buffer_idx, sz);
                 buffer_idx += SIZEOF_LENGTH + sz;
                 ++args.index;
@@ -826,7 +826,7 @@ var sproto = (function() {
         if ((notzero == 7 || notzero == 6) && n > 0) {
             notzero = 8;
         }
-        
+
         if (notzero == 8){
             if(n > 0){
                 return 8;
@@ -975,7 +975,7 @@ var sproto = (function() {
                         // if (srcsz <= 0){
                         //     break;
                         // }
-                        
+
                     }
                     ++size;
                 }
@@ -1001,7 +1001,7 @@ var sproto = (function() {
         var size = sproto_unpack(inbuf, src_idx, buffer, buffer_idx);
         return buffer;
     },
-    
+
     t.createNew = function(binsch){
         var s = {};
         var result = new Object();
@@ -1022,7 +1022,7 @@ var sproto = (function() {
             var data_idx = buffer_idx;
             var header_sz = SIZEOF_HEADER + st.maxn * SIZEOF_FIELD;
             var index, lasttag, datasz;
-        
+
             args.ud = ud;
             data_idx = header_idx + header_sz;
             index = 0;
@@ -1039,7 +1039,7 @@ var sproto = (function() {
                 } else {
                     args.subtype = null;
                 }
-                
+
                 args.mainindex = f.key;
                 args.extra = f.extra;
                 var type_ret = type & SPROTO_TARRAY;
@@ -1108,10 +1108,10 @@ var sproto = (function() {
                     lasttag = f.tag;
                 }
             }
-        
+
             buffer[header_idx] = index & 0xff;
             buffer[header_idx+1] = (index >> 8) & 0xff;
-            
+
             datasz = data_idx - (header_idx + header_sz);
             data_idx = header_idx + header_sz;
             if (index != st.maxn){
@@ -1123,7 +1123,7 @@ var sproto = (function() {
                 var remove_size = buffer.length - (header_idx + SIZEOF_HEADER + index * SIZEOF_FIELD + v.length);
                 buffer.splice(header_idx + SIZEOF_HEADER + index * SIZEOF_FIELD + v.length, buffer.length);
             }
-        
+
             return SIZEOF_HEADER + index * SIZEOF_FIELD + datasz;
         }
 
@@ -1133,7 +1133,7 @@ var sproto = (function() {
                 alert("table is too deep");
                 return -1;
             }
-        
+
             if (self.indata[args.tagname] == null){
                 return SPROTO_CB_NIL;
             }
@@ -1143,12 +1143,12 @@ var sproto = (function() {
                 // a new array
                 if (args.tagname != self.array_tag){
                     self.array_tag = args.tagname;
-        
+
                     if (typeof(self.indata[args.tagname]) != "object"){
                         self.array_index = 0;
                         return SPROTO_CB_NIL;
                     }
-        
+
                     if (self.indata[args.tagname].length == 0 || self.indata[args.tagname].length == null){
                         self.array_index = 0;
                         return SPROTO_CB_NOARRAY;
@@ -1162,7 +1162,7 @@ var sproto = (function() {
             else{
                 target = self.indata[args.tagname];
             }
-        
+
             switch(args.type) {
             case SPROTO_TINTEGER:{
                 var v, vh, isnum;
@@ -1199,7 +1199,7 @@ var sproto = (function() {
                     //return SPROTO_CB_ERROR;
                     args.length = sz;
                 }
-                
+
                 for (var i = 0; i < arr.length; i++) {
                     args.buffer[args.buffer_idx + i] = arr[i];
                 }
@@ -1221,7 +1221,7 @@ var sproto = (function() {
                 return SPROTO_CB_ERROR;
             }
         }
-        
+
         function sproto_decode(st, data, size, cb, ud){
             var args = new Object();
             var total = size;
@@ -1236,7 +1236,7 @@ var sproto = (function() {
             datastream = stream.slice(fn * SIZEOF_FIELD);
             size -= fn * SIZEOF_FIELD;
             args.ud = ud;
-        
+
             tag = -1;
             for(var i=0; i<fn; i++){
                 var currentdata = null;
@@ -1273,7 +1273,7 @@ var sproto = (function() {
                 } else {
                     args.subtype = null;
                 }
-                
+
                 args.index = 0;
                 args.mainindex = f.key;
                 args.extra = f.extra;
@@ -1499,7 +1499,7 @@ var sproto = (function() {
             } else {
                 st = type;
             }
-            
+
             var tbl_index = 2;
             var enbuffer = new Array();
             var buffer_idx = 0;
@@ -1584,6 +1584,7 @@ var sproto = (function() {
         }
 
         host.attach = function(sp) {
+            this.attachsp = sp;
             var self = this;
             return (name, args, session) => {
                 var proto = queryproto(sp, name);
@@ -1638,20 +1639,21 @@ var sproto = (function() {
 
                 if (header_tmp.session) {
                     return {
-                        type: "REQUEST", 
-                        pname: proto.name, 
-                        result: result, 
-                        responseFunc: gen_response(this, proto.response, header_tmp.session), 
+                        type: "REQUEST",
+                        pname: proto.name,
+                        result: result,
+                        responseFunc: gen_response(this, proto.response, header_tmp.session),
                         session: header_tmp.session,
                     }
                 } else {
                     return {
-                        type: "REQUEST", 
-                        pname: proto.name, 
+                        type: "REQUEST",
+                        pname: proto.name,
                         result: result,
                     }
                 }
             } else {
+                sp = this.attachsp;
                 var session = header_tmp.session;
                 var response = this.session[session];
                 delete this.session[session];
