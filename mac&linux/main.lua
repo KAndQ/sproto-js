@@ -3,7 +3,7 @@
 1. 启动控制台;
 2. cd 到当前文件所在目录;
 3. 将协议定义的文件放在 proto 文件夹里面(以 sp 为后缀);
-4. 运行 ./skynet gen_spb.config
+4. 运行 ./skynet_$platform $platform.config, 例如: ./skynet_linux linux.config
 5. 生成的 spb 后缀文件就是需要的内容.
 --]]
 
