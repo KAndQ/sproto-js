@@ -2,3 +2,8 @@
 /sproto-js.sublime-project
 /sproto-js.sublime-workspace
 /sproto
+/mac/cservice/gate.so.dSYM
+/mac/cservice/*
+/mac/luaclib/*
+/mac/lualib/*.DS_Store
+/mac/proto/*.DS_Store

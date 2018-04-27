@@ -7,10 +7,12 @@ js 的实现原版在[这里](https://github.com/zhangshiqian1214/sproto-js). �
 - [x] attach 函数
 - [x] dispatch 函数
 - [x] 代码可读性, 格式化修改
-- [ ] spb 文件生成工具
-    + windows ;
-    + mac;     // doing....
-    + linux;
 - [x] 示例
 - [x] typescript 支持 **(import * as sproto from "./sproto")**
 - [x] sproto_dump 实现, sproto 对象增加 dump 方法
+
+spb 文件生成工具
+-
+mac | linux | windows
+--- | ----- | -------
+![Build status](https://ci.appveyor.com/api/projects/status/nlgirox464j6ldg5/branch/v3?svg=true)| doing | -
