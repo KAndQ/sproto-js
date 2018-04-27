@@ -1,5 +1,5 @@
 
-let sproto = require("./sproto");
+let sproto = require(".././sproto");
 let fs = require("fs");
 
 function readBinary(filename) {
